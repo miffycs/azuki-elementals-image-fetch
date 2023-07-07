@@ -2,7 +2,7 @@ name: Run python script and commit updates
 
 on:
   schedule:
-    - cron:  '*/2 * * * *'
+    - cron:  '*/5 * * * *'
 
 jobs:
   build:
@@ -24,10 +24,7 @@ jobs:
         pip install pandas numpy
 
     - name: Run python script
-      run: python main.py  # Replace with your Python script
-
-    - name: Run python script
-      run: python main.py  # Replace with your Python script
+      run: python main.py
 
     - name: Commit and push if it changed
       run: |
