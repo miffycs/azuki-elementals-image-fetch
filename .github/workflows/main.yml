@@ -2,35 +2,37 @@ name: Run python script and commit updates
 
 on:
   schedule:
-    - cron:  '*/5 * * * *'
+    - cron: '*/5 * * * *'
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2  # this step checks out your repository code
+      - uses: actions/checkout@v2
 
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.8
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install requests
-        pip install pandas numpy
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests pandas numpy
 
-    - name: Run python script
-      run: python main.py
+      - name: Run python script
+        run: python main.py
 
-    - name: Pull master. Commit and push if data changed
-      run: |
-        git config --global user.email "action@github.com"
-        git config --global user.name "GitHub Action"
-        git pull origin master --rebase
-        git diff
-        git commit -am "Data updated" || echo "No changes to commit"
-        git push
+      - name: Check for modifications
+        id: git-diff
+        run: |
+          git diff --quiet || echo '::set-output name=changed::true'
+        
+      - name: Commit and push if there are changes
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+          git commit -am "Data updated" 
+          git push origin HEAD
+        if: steps.git-diff.outputs.changed == 'true'
