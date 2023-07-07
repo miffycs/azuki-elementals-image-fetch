@@ -1,38 +1,33 @@
-name: Run python script and commit updates
+name: Run fetch.js and commit changes
 
 on:
   schedule:
-    - cron: '*/15 * * * *'
+    - cron: '*/5 * * * *'
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Set up Python 3.8
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.8
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: 14
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install requests pandas numpy
+    - name: Run fetch.js
+      run: node ./util/fetch.js
 
-      - name: Run python script
-        run: python main.py
+    - name: Check for changes
+      id: changes
+      uses: UnicornGlobal/has-changes-action@v1.0.11
 
-      - name: Check for modifications
-        id: git-diff
-        run: |
-          git diff --quiet || echo '::set-output name=changed::true'
-        
-      - name: Commit and push if there are changes
-        run: |
-          git config --global user.email "action@github.com"
-          git config --global user.name "GitHub Action"
-          git commit -am "Data updated" || true
-          git push origin HEAD
-        if: steps.git-diff.outputs.changed == 'true'
+    - name: Commit and push
+      run: |
+        git config --global user.email "action@github.com"
+        git config --global user.name "GitHub Action"
+        git add -A
+        git commit -m "Fetched new data" || echo "No changes to commit"
+        git push
