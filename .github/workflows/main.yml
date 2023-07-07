@@ -26,10 +26,11 @@ jobs:
     - name: Run python script
       run: python main.py
 
-    - name: Commit and push if it changed
+    - name: Pull master. Commit and push if data changed
       run: |
-        git diff
         git config --global user.email "action@github.com"
         git config --global user.name "GitHub Action"
+        git pull origin master --rebase
+        git diff
         git commit -am "Data updated" || echo "No changes to commit"
         git push
